@@ -118,6 +118,13 @@ module.exports = (function() {
                 catch (e){
                     throw e;
                 }
+
+                try {
+                    fs.fsyncSync(fd);
+                }
+                catch (e){
+                    throw e;
+                }
                 finally {
                     fs.closeSync(fd);
                 }
@@ -151,10 +158,12 @@ module.exports = (function() {
                                 fs.chmod(path, 438, function() {
                                     fs.open(path, 'w', 438, function(err, fd) {
                                         fs.write(fd, content, 0, content.length, 0, function() {
-                                            fs.close(fd, function() {
-                                                fs.chmod(path, attr || 438, function() {
-                                                    callback(true);
-                                                })
+                                            fs.fsync(fd, function() {
+                                              fs.close(fd, function() {
+                                                  fs.chmod(path, attr || 438, function() {
+                                                      callback(true);
+                                                  })
+                                              });
                                             });
                                         });
                                     });
@@ -162,10 +171,12 @@ module.exports = (function() {
                             } else {
                                 if(fd) {
                                     fs.write(fd, content, 0, content.length, 0, function() {
-                                        fs.close(fd, function() {
-                                            fs.chmod(path, attr || 438, function() {
-                                                callback(true);
-                                            })
+                                        fs.fsync(fd, function() {
+                                          fs.close(fd, function() {
+                                              fs.chmod(path, attr || 438, function() {
+                                                  callback(true);
+                                              })
+                                          });
                                         });
                                     });
                                 } else {
